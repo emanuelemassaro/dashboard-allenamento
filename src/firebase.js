@@ -22,12 +22,12 @@ import {
 // ⚠️ Sostituisci questi valori con quelli del TUO progetto Firebase.
 // Li trovi su: Firebase Console → Impostazioni progetto → Generali → "Le tue app" → SDK config
 const firebaseConfig = {
-  apiKey: "INSERISCI_API_KEY",
-  authDomain: "INSERISCI_PROGETTO.firebaseapp.com",
-  projectId: "INSERISCI_PROGETTO",
-  storageBucket: "INSERISCI_PROGETTO.appspot.com",
-  messagingSenderId: "INSERISCI_SENDER_ID",
-  appId: "INSERISCI_APP_ID",
+  apiKey: "AIzaSyAbAnN9NL3Ty7A2X3CtLKOA-VVNlWV76W8",
+  authDomain: "dashboard-allenamento.firebaseapp.com",
+  projectId: "dashboard-allenamento",
+  storageBucket: "dashboard-allenamento.firebasestorage.app",
+  messagingSenderId: "261662688344",
+  appId: "1:261662688344:web:9c189381b71c98adc2762d",
 };
 
 const app = initializeApp(firebaseConfig);
