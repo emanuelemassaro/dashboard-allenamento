@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { loadAllData, saveField } from "./firebase.js";
+import { loadAllData, saveField, loadPhotos, uploadPhoto, deletePhoto } from "./firebase.js";
 
 // ---------- Costanti ----------
 const HEIGHT_CM = 181;
@@ -204,6 +204,7 @@ export default function Dashboard() {
   const [weights, setWeights] = useState([]);
   const [workouts, setWorkouts] = useState([]);
   const [measurements, setMeasurements] = useState([]);
+  const [photos, setPhotos] = useState([]);
   const [tab, setTab] = useState("overview");
   const [expandedScheda, setExpandedScheda] = useState("A");
 
@@ -219,6 +220,10 @@ export default function Dashboard() {
   const [mChest, setMChest] = useState("");
   const [mWaist, setMWaist] = useState("");
   const [mLeg, setMLeg] = useState("");
+  const [pDate, setPDate] = useState(todayISO());
+  const [pFile, setPFile] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [lightboxPhoto, setLightboxPhoto] = useState(null);
 
   const [saveStatus, setSaveStatus] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -229,6 +234,8 @@ export default function Dashboard() {
       setWeights(data.weights.sort((a, b) => a.date.localeCompare(b.date)));
       setWorkouts(data.workouts.sort((a, b) => a.date.localeCompare(b.date)));
       setMeasurements(data.measurements.sort((a, b) => a.date.localeCompare(b.date)));
+      const photosData = await loadPhotos();
+      setPhotos(photosData.sort((a, b) => a.date.localeCompare(b.date)));
       setLoading(false);
     })();
   }, []);
@@ -314,6 +321,39 @@ export default function Dashboard() {
     await saveKey("measurements", updated);
   }
 
+  async function handleUploadPhoto() {
+    if (!pFile || !pDate) {
+      setErrorMsg("Seleziona una data e un'immagine.");
+      return;
+    }
+    if (!pFile.type.startsWith("image/")) {
+      setErrorMsg("Il file selezionato non è un'immagine.");
+      return;
+    }
+    setErrorMsg("");
+    setUploadingPhoto(true);
+    const result = await uploadPhoto(pFile, pDate);
+    setUploadingPhoto(false);
+    if (result) {
+      const updated = [...photos, result].sort((a, b) => a.date.localeCompare(b.date));
+      setPhotos(updated);
+      setPFile(null);
+      flashSaved();
+    } else {
+      setErrorMsg("Errore durante il caricamento della foto. Riprova.");
+    }
+  }
+
+  async function handleDeletePhoto(photo) {
+    const ok = await deletePhoto(photo.id, photo.storagePath);
+    if (ok) {
+      setPhotos(photos.filter((p) => p.id !== photo.id));
+      if (lightboxPhoto && lightboxPhoto.id === photo.id) setLightboxPhoto(null);
+    } else {
+      setErrorMsg("Errore durante l'eliminazione della foto.");
+    }
+  }
+
   const latestWeight = weights.length ? weights[weights.length - 1] : null;
   const firstWeight = weights.length ? weights[0] : null;
   const weightDelta = latestWeight && firstWeight ? latestWeight.value - firstWeight.value : null;
@@ -379,6 +419,7 @@ export default function Dashboard() {
           { id: "peso", label: "Peso" },
           { id: "allenamenti", label: "Allenamenti" },
           { id: "misure", label: "Misure corpo" },
+          { id: "foto", label: "Foto" },
         ].map((t) => (
           <button
             key={t.id}
@@ -731,6 +772,75 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* FOTO */}
+      {tab === "foto" && (
+        <div style={styles.section}>
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Aggiungi foto progressi</div>
+            <div style={styles.formRow}>
+              <div style={styles.formField}>
+                <label style={styles.label}>Data</label>
+                <input type="date" value={pDate} onChange={(e) => setPDate(e.target.value)} style={styles.input} />
+              </div>
+              <div style={{ ...styles.formField, flex: "2 1 200px" }}>
+                <label style={styles.label}>Immagine</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                  style={styles.input}
+                />
+              </div>
+              <button
+                className="dash-btn"
+                onClick={handleUploadPhoto}
+                disabled={uploadingPhoto}
+                style={{ ...styles.primaryBtn, opacity: uploadingPhoto ? 0.6 : 1 }}
+              >
+                {uploadingPhoto ? "Caricamento…" : "Carica foto"}
+              </button>
+            </div>
+          </div>
+
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Cronologia foto</div>
+            {photos.length === 0 ? (
+              <div style={styles.emptyState}>Nessuna foto ancora. Carica la prima foto sopra per iniziare a tracciare i progressi visivamente — consigliato farlo una volta al mese, con stessa posa e luce.</div>
+            ) : (
+              <div style={styles.photoGrid}>
+                {photos.slice().reverse().map((p) => (
+                  <div key={p.id} className="row-hover" style={styles.photoCard}>
+                    <img
+                      src={p.url}
+                      alt={`Foto progressi ${formatDateIt(p.date)}`}
+                      style={styles.photoThumb}
+                      onClick={() => setLightboxPhoto(p)}
+                    />
+                    <div style={styles.photoCardFooter}>
+                      <span style={styles.photoDate}>{formatDateIt(p.date)}</span>
+                      <button className="del-btn" onClick={() => handleDeletePhoto(p)} style={styles.delBtn} title="Elimina">✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* LIGHTBOX FOTO */}
+      {lightboxPhoto && (
+        <div style={styles.lightboxOverlay} onClick={() => setLightboxPhoto(null)}>
+          <div style={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxPhoto.url} alt={`Foto ${formatDateIt(lightboxPhoto.date)}`} style={styles.lightboxImg} />
+            <div style={styles.lightboxFooter}>
+              <span style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>{formatDateIt(lightboxPhoto.date)}</span>
+              <button onClick={() => setLightboxPhoto(null)} style={styles.lightboxClose}>✕ Chiudi</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={styles.footer}>I tuoi dati sono salvati solo per te e restano disponibili la prossima volta che apri questa dashboard.</div>
     </div>
   );
@@ -909,4 +1019,72 @@ const styles = {
   th: { textAlign: "left", padding: "8px 10px", color: "#9a9286", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.03em", borderBottom: "1px solid #ece5d6" },
   td: { padding: "9px 10px", color: "#2b2520", borderBottom: "1px solid #f3eee2" },
   footer: { textAlign: "center", fontSize: 11, color: "#bcb3a2", marginTop: 4 },
+  photoGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+    gap: 12,
+    marginTop: 10,
+  },
+  photoCard: {
+    borderRadius: 12,
+    overflow: "hidden",
+    border: "1px solid #ece5d6",
+    background: "#fdfcf9",
+  },
+  photoThumb: {
+    width: "100%",
+    height: 140,
+    objectFit: "cover",
+    display: "block",
+    cursor: "pointer",
+  },
+  photoCardFooter: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "6px 10px",
+  },
+  photoDate: { fontSize: 11.5, color: "#7a7164", fontWeight: 600 },
+  lightboxOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(20,16,12,0.82)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+    padding: 20,
+  },
+  lightboxContent: {
+    maxWidth: "90vw",
+    maxHeight: "90vh",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  lightboxImg: {
+    maxWidth: "90vw",
+    maxHeight: "78vh",
+    objectFit: "contain",
+    borderRadius: 10,
+  },
+  lightboxFooter: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  lightboxClose: {
+    background: "rgba(255,255,255,0.12)",
+    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.3)",
+    borderRadius: 8,
+    padding: "6px 12px",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "'Inter', sans-serif",
+  },
 };
