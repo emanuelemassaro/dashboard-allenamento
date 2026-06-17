@@ -48,6 +48,27 @@ service cloud.firestore {
 
 Clicca **"Pubblica"**.
 
+## Passo 3bis — Attiva Firebase Storage (per la sezione Foto)
+
+1. Nella Firebase Console, menu a sinistra → **"Databases & Storage" → "Storage"**
+2. Clicca **"Get started"**, scegli la stessa location usata per Firestore
+3. Vai sulla tab **"Regole"** (Rules) di Storage e sostituisci con:
+
+```
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /progress-photos/{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+4. Clicca **"Pubblica"**
+
+> Stessa nota di prima: questo rende le foto accessibili a chiunque abbia il link del sito — va bene per condividere col PT, ma non è un sistema con login/password.
+
 ## Passo 4 — Pubblica il sito su Netlify (gratis)
 
 **Opzione più semplice (drag & drop, senza GitHub):**
