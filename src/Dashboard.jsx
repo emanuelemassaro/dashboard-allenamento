@@ -45,6 +45,7 @@ const SCHEDA_EXERCISES = {
     { name: "Curl bilanciere EZ", load: "15 kg", sets: "3 × 10" },
     { name: "Dips alle parallele assistite", load: "35 kg assistenza", sets: "3 × max" },
     { name: "Affondi con manubri", load: "10 kg", sets: "3 × 10 per gamba" },
+    { name: "Plank", load: "—", sets: "3 × 30 sec" },
   ],
 };
 
