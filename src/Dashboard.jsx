@@ -3,16 +3,20 @@ import { loadAllData, saveField, loadPhotos, uploadPhoto, deletePhoto } from "./
 
 // ---------- Costanti ----------
 const HEIGHT_CM = 181;
-const SCHEDE = ["A", "B", "C"];
+const SCHEDE = ["A", "B", "C", "A2", "B2"];
 const SCHEDA_LABEL = {
   A: "Trazioni · Lat machine · Spalle",
   B: "Panca · Rematore · Face pull",
   C: "Trazioni · Lat stretta · Dips",
+  A2: "Mesociclo 2 · Giorno 1 · AMRAP",
+  B2: "Mesociclo 2 · Giorno 2 · Circuit",
 };
 const SCHEDA_COLOR = {
   A: "#c97b4a",
   B: "#5b8a72",
   C: "#7a6fb0",
+  A2: "#4a8ab0",
+  B2: "#b04a6f",
 };
 
 const SCHEDA_EXERCISES = {
@@ -46,6 +50,27 @@ const SCHEDA_EXERCISES = {
     { name: "Dips alle parallele assistite", load: "35 kg assistenza", sets: "3 × max" },
     { name: "Affondi con manubri", load: "10 kg", sets: "3 × 10 per gamba" },
     { name: "Plank", load: "—", sets: "3 × 30 sec" },
+  ],
+  A2: [
+    { name: "Riscaldamento (esercizi vari sul posto)", load: "—", sets: "10 min" },
+    { name: "Esercizi propriocettivi", load: "—", sets: "—" },
+    { name: "Piegamenti braccia (toccare terra con il petto)", load: "corpo libero", sets: "4 × 2  →  5 × 4" },
+    { name: "Dip con le sedie", load: "corpo libero", sets: "4 × 8  →  5 × 10" },
+    { name: "AMRAP — Squat (scalzo)", load: "corpo libero", sets: "15 rep  →  30 rep" },
+    { name: "AMRAP — Ponte a terra", load: "corpo libero", sets: "20 rep  →  35 rep" },
+    { name: "AMRAP — Sit up", load: "corpo libero", sets: "15 rep  →  30 rep" },
+    { name: "AMRAP — Piegamenti braccia", load: "corpo libero", sets: "10 rep  →  18 rep" },
+    { name: "AMRAP — Affondi (scalzo)", load: "corpo libero", sets: "16 rep  →  30 rep" },
+  ],
+  B2: [
+    { name: "Riscaldamento (esercizi vari sul posto)", load: "—", sets: "10 min" },
+    { name: "Esercizi propriocettivi", load: "—", sets: "—" },
+    { name: "Trazioni", load: "assistenza da definire", sets: "da definire post-test" },
+    { name: "Circuit — Plank", load: "—", sets: "30 sec  ×  3→5 giri" },
+    { name: "Circuit — Side plank", load: "—", sets: "30 sec  ×  3→5 giri" },
+    { name: "Circuit — Piegamenti stretti", load: "corpo libero", sets: "30 sec  ×  3→5 giri" },
+    { name: "Circuit — Affondi laterali", load: "corpo libero", sets: "30 sec  ×  3→5 giri" },
+    { name: "Circuit — Sprawl", load: "corpo libero", sets: "30 sec  ×  3→5 giri" },
   ],
 };
 
