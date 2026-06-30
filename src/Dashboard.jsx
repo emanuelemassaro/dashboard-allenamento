@@ -58,6 +58,7 @@ const SCHEDA_EXERCISES = {
     { name: "Esercizi propriocettivi", load: "—", sets: "—" },
     { name: "Piegamenti braccia (toccare terra con il petto)", load: "corpo libero", sets: "4 × 2  →  5 × 4" },
     { name: "Dip con le sedie", load: "corpo libero", sets: "4 × 8  →  5 × 10" },
+    { name: "AMRAP — Tempo totale", load: "—", sets: "15 min  →  25 min" },
     { name: "AMRAP — Squat (scalzo)", load: "corpo libero", sets: "15 rep  →  30 rep" },
     { name: "AMRAP — Ponte a terra", load: "corpo libero", sets: "20 rep  →  35 rep" },
     { name: "AMRAP — Sit up", load: "corpo libero", sets: "15 rep  →  30 rep" },
