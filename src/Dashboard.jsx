@@ -3,13 +3,14 @@ import { loadAllData, saveField, loadPhotos, uploadPhoto, deletePhoto } from "./
 
 // ---------- Costanti ----------
 const HEIGHT_CM = 181;
-const SCHEDE = ["A", "B", "C", "A2", "B2"];
+const SCHEDE = ["A", "B", "C", "A2", "B2", "Camminata"];
 const SCHEDA_LABEL = {
   A: "Trazioni · Lat machine · Spalle",
   B: "Panca · Rematore · Face pull",
   C: "Trazioni · Lat stretta · Dips",
   A2: "Mesociclo 2 · Giorno 1 · AMRAP",
   B2: "Mesociclo 2 · Giorno 2 · Circuit",
+  Camminata: "Camminata veloce",
 };
 const SCHEDA_COLOR = {
   A: "#c97b4a",
@@ -17,6 +18,7 @@ const SCHEDA_COLOR = {
   C: "#7a6fb0",
   A2: "#4a8ab0",
   B2: "#b04a6f",
+  Camminata: "#4aab94",
 };
 
 const SCHEDA_EXERCISES = {
@@ -240,6 +242,8 @@ export default function Dashboard() {
   const [newWorkoutDate, setNewWorkoutDate] = useState(todayISO());
   const [newWorkoutScheda, setNewWorkoutScheda] = useState("A");
   const [newWorkoutNote, setNewWorkoutNote] = useState("");
+  const [newWalkTime, setNewWalkTime] = useState("");
+  const [newWalkKm, setNewWalkKm] = useState("");
   const [showMeasureForm, setShowMeasureForm] = useState(false);
   const [mDate, setMDate] = useState(todayISO());
   const [mArm, setMArm] = useState("");
@@ -293,7 +297,16 @@ export default function Dashboard() {
       return;
     }
     setErrorMsg("");
-    const entry = { date: newWorkoutDate, scheda: newWorkoutScheda, note: newWorkoutNote.trim() };
+    let note = newWorkoutNote.trim();
+    if (newWorkoutScheda === "Camminata") {
+      const parts = [];
+      if (newWalkTime) parts.push(`${newWalkTime} min`);
+      if (newWalkKm) parts.push(`${newWalkKm} km`);
+      note = parts.join(" · ") + (note ? ` · ${note}` : "");
+      setNewWalkTime("");
+      setNewWalkKm("");
+    }
+    const entry = { date: newWorkoutDate, scheda: newWorkoutScheda, note };
     const updated = [...workouts, entry].sort((a, b) => a.date.localeCompare(b.date));
     setWorkouts(updated);
     setNewWorkoutNote("");
@@ -654,6 +667,32 @@ export default function Dashboard() {
                 </select>
               </div>
             </div>
+            {newWorkoutScheda === "Camminata" && (
+              <div style={{ ...styles.formRow, marginTop: 10 }}>
+                <div style={styles.formField}>
+                  <label style={styles.label}>Tempo (min)</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="es. 45"
+                    value={newWalkTime}
+                    onChange={(e) => setNewWalkTime(e.target.value)}
+                    style={styles.input}
+                  />
+                </div>
+                <div style={styles.formField}>
+                  <label style={styles.label}>Distanza (km)</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="es. 3.5"
+                    value={newWalkKm}
+                    onChange={(e) => setNewWalkKm(e.target.value)}
+                    style={styles.input}
+                  />
+                </div>
+              </div>
+            )}
             <div style={{ marginTop: 10 }}>
               <label style={styles.label}>Nota (opzionale)</label>
               <input
